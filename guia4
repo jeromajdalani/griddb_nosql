@@ -1,0 +1,346 @@
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
+using namespace std;
+
+#include "rlutil.h"
+using namespace rlutil;
+
+const int TAM=3;
+#include "prototipo.h"
+#include "funciones.h"
+#include "producto.h"
+
+
+int main()
+{
+    struct productos vec[TAM];
+    menu_producto(vec);
+
+    return 0;
+}
+----------------------------------------------------------------------------------------
+#ifndef PRODUCTO_H_INCLUDED
+#define PRODUCTO_H_INCLUDED
+
+
+
+
+void menu_producto(struct productos *vec)
+{
+    ID(vec);
+    int c=0;
+    int op;
+    bool continuar=true;
+    bool vector_lleno=false;
+    while(continuar)
+    {
+
+        system ("color F0");///LAS LETRAS REPRESENTAN EL COLOR DE FONDO DE PANTALLA Y EL NUMERO EL COLOR DEL TEXTO
+        ///PLANILLA EN PROTOTIPO.
+        cout <<endl;
+        cout <<endl;
+        cout <<"   "<<"|----------------------------------------------|"<< endl;
+        cout <<"   "<<"|                MENU PRODUCTOS                |" << endl;
+        cout <<"   "<<"|----------------------------------------------|"<< endl;
+        cout <<"   "<<"|  1 - Cargar producto                         |"<< endl;
+        cout <<"   "<<"|  2 - Editar producto                         |"<< endl;
+        cout <<"   "<<"|  3 - Listar producto por ID                  |"<< endl;
+        cout <<"   "<<"|  4 - Listar productos (ordenados por precio) |"<< endl;
+        cout <<"   "<<"|----------------------------------------------|"<< endl;
+        cout <<"   "<<"|  0 - Salir del programa                      |"<< endl;
+        cout <<"   "<<"|----------------------------------------------|"<< endl;
+        cout <<endl;
+        cout <<endl;
+        cout <<"     "<<"* INGRESE UNA OPCION: "<<endl;
+        cout <<"     ";
+        cin>>op;
+
+        system("cls");
+        switch(op)
+        {
+
+        case 1:
+        {
+            system("color F8");
+            if(c<TAM)
+            {
+
+                bool cargo=cargar_producto(vec,c);///UTILIZO UN BOOLEANO PARA SABER CUANDO SE CARGA UN PRODUCTO Y CUANDO NO
+                if (cargo)
+                {
+                    system("cls");
+                    system("color F2");
+                    cout<<endl;
+                    cout<<endl;
+                    cout<<"EL PRODUCTO SE CARGO CORRRECTAMENTE"<<endl;
+                    c++;
+                }
+
+            }
+
+            if(vector_lleno)///ESTE IF HACE QUE ME SALGA UN MENSAJE EN PANTALLA CUANDO ALCANCE LA CANT MAX DE PRODUCTOS.
+            {
+                system("cls");
+                system("color F5");
+                cout<<endl;
+                cout<<endl;
+                cout<<"CANTIDAD MAXIMA DE PRODUCTOS ALCANZADA"<<endl;
+                cout<<"        -YA SE CARGARON  "<<TAM<<"  PRODUCTOS"<<endl;
+            }
+            if(c==TAM)
+            {
+                vector_lleno=true;
+            }
+        }
+        break;
+        case 2:
+        {
+
+            int ID;
+            cout<<"INGRESE LA ID QUE DESEA BUSCAR"<<endl;
+            cin>>ID;
+            int encontro = buscar(vec,ID,c);///USO LA FUNCION BUSCAR PARA QUE ME DEVUELVA UN INDICE Y SI NO LO ENCUENTRA UN -1.
+            if(encontro!=-1)
+            {
+                editar(vec,encontro);
+                system("cls");
+                system("color F2");
+                cout<<endl;
+                cout<<endl;
+                cout<<"EL PRODUCTO SE EDITO CORRRECTAMENTE"<<endl;
+            }
+            else
+            {
+                system("cls");
+                system("color F5");
+                cout<<" NO SE ENCONTRO EL PRODUCTO: "<<ID<<endl;
+            }
+
+
+        }
+        break;
+        case 3:
+        {
+            int ID;
+            cout<<"INGRESE LA ID DEL PRODUCTO QUE DESEA VER"<<endl;
+            cin>>ID;
+            int encontro = buscar(vec,ID,c);
+            if(encontro!=-1)
+            {
+                mostrar(vec,encontro);
+            }
+            else
+            {
+                system("cls");
+                system("color F5");
+                cout<<" NO SE ENCONTRO EL PRODUCTO: "<<ID<<endl;
+            }
+
+
+        }
+        break;
+        case 4:
+        {
+            system("color f0");
+            mostrar_todos(vec);
+        }
+        break;
+        case 0:
+        {
+            continuar=false;
+        }
+        break;
+        default:
+        {
+            system("cls");
+            system("color F5");
+            cout<<"OPCION INCORRECTA"<<endl;
+        }
+        break;
+        }
+        system("pause");
+        system("cls");
+
+    }
+}
+#endif // PRODUCTO_H_INCLUDED
+---------------------------------------------------------------------------------------------------------------------------
+
+#ifndef FUNCIONES_H_INCLUDED
+#define FUNCIONES_H_INCLUDED
+
+
+void ID(struct productos *vec)
+{
+    for(int i=0; i<TAM; i++)
+    {
+        vec[i].ID=-1;
+    }
+}
+
+bool cargar_producto(struct productos *vec,int c)
+{
+    cout<<endl;
+    cout<<endl;
+    cout<<"  INGRESE ID "<<endl;
+    cout<<"     ";
+    cin>>vec[c].ID;
+    int encontro=buscar(vec,vec[c].ID,c);/// LA FUNCION BUSCAR ME SIRVE PARA SABER SI EL PRODUCTO QUE SE QUIERE CARGAR YA
+    if(encontro==-1)                    ///  SE HABIA CARGADO O NO.
+    {
+
+        cout<<"  INGRESE NOMBRE PRODUCTO"<<endl;
+        cin.ignore();
+        cout<<"     ";
+        cin.getline(vec[c].nombre,30);
+        cout<<"  INGRESE PRECIO"<<endl;
+        cout<<"     ";
+        cin>>vec[c].precio;
+        cout<<"  INGRESE STOCK"<<endl;
+        cout<<"     ";
+        cin>>vec[c].stock;
+        cout<<"  INGRESE STOCK MIN"<<endl;
+        cout<<"     ";
+        cin>>vec[c].stock_min;
+        return true;
+
+    }
+    system("cls");
+    system("color F5");
+    cout<<endl;
+    cout<<endl;
+    cout<<"EL PRODUCTO CON ID: "<<vec[c].ID<<" NO SE CARGO"<<endl;
+    cout<<"MOTIVOS: "<<endl;
+    cout<<"        -ID REPPETIDA"<<endl;
+    return false;
+}
+
+int buscar(struct productos *vec,int ID,int c)
+{
+    for(int i=0; i<c; i++)
+    {
+        if(ID==vec[i].ID)
+        {
+
+            return i;
+        }
+    }
+    return -1;
+}
+void editar(struct productos *vec,int ind)
+{
+    cout<<"INGRESE NOMBRE PRODUCTO"<<endl;
+    cin.ignore();
+    cin.getline(vec[ind].nombre,30);
+    cout<<"INGRESE PRECIO"<<endl;
+    cin>>vec[ind].precio;
+    cout<<"INGRESE STOCK"<<endl;
+    cin>>vec[ind].stock;
+    cout<<"INGRESE STOCK MIN"<<endl;
+    cin>>vec[ind].stock_min;
+}
+
+void mostrar(struct productos *vec,int ind)
+{
+    cout<<" |----------------------|"<<endl;
+    cout<<" |PRODUCTO N: "<<vec[ind].ID<<endl;
+    cout<<" |----------------------|"<<endl;
+    cout<<" |  NOMBRE PRODUCTO:    |"<<endl;
+    cout<<" |   "<<vec[ind].nombre<<endl;
+    cout<<" |         -----        |"<<endl;
+    cout<<" |  PRECIO:             |"<<endl;;
+    cout<<" |   "<<vec[ind].precio<<endl;
+    cout<<" |         -----        |"<<endl;
+    cout<<" |  STOCK:              |"<<endl;;
+    cout<<" |   "<<vec[ind].stock<<endl;
+    cout<<" |         -----        |"<<endl;
+    cout<<" |  STOCK MIN:          | "<<endl;;
+    cout<<" |   "<<vec[ind].stock_min<<endl;
+    cout<<" |----------------------|"<<endl;
+}
+
+void mostrar_todos(struct productos *vec)
+{
+    struct productos aux;
+    for (int i=0; i<TAM; i++)
+    {
+        for (int j=0; j<TAM-1; j++)
+        {
+            if(vec[j].precio<vec[j+1].precio)
+            {
+                aux=vec[j];
+                vec[j]=vec[j+1];
+                vec[j+1]=aux;
+            }
+        }
+    }
+
+    for(int i=0; i<TAM; i++)
+    {
+        if(vec[i].ID!=-1)
+        {
+            cout<<endl;
+            cout<<endl;
+            cout<<" |----------------------|"<<endl;
+            cout<<" |PRODUCTO N: "<<vec[i].ID<<endl;
+            cout<<" |----------------------|"<<endl;
+            cout<<" |  NOMBRE PRODUCTO:    |"<<endl;
+            cout<<" |   "<<vec[i].nombre<<endl;
+            cout<<" |         -----        |"<<endl;
+            cout<<" |  PRECIO:             |"<<endl;;
+            cout<<" |   "<<vec[i].precio<<endl;
+            cout<<" |         -----        |"<<endl;
+            cout<<" |  STOCK:              |"<<endl;;
+            cout<<" |   "<<vec[i].stock<<endl;
+            cout<<" |         -----        |"<<endl;
+            cout<<" |  STOCK MIN:          | "<<endl;;
+            cout<<" |   "<<vec[i].stock_min<<endl;
+            cout<<" |----------------------|"<<endl;
+        }
+    }
+}
+#endif // FUNCIONES_H_INCLUDED
+------------------------------------------------------------------------------------------------------------------------------------
+#ifndef PROTOTIPO_H_INCLUDED
+#define PROTOTIPO_H_INCLUDED
+
+struct productos
+{
+    int ID;
+    char nombre [30];
+    float precio;
+    int stock;
+    int stock_min;
+};
+
+void menu_producto(struct productos *);
+bool cargar_producto(struct productos *,int);
+int buscar(struct productos *,int,int);
+void editar(struct productos *vec,int);
+void mostrar(struct productos *vec,int);
+void mostrar_todos(struct productos *vec);
+void ID(struct productos *vec);
+
+
+/*
+COLOR TEXTO    |  COLOR CONSOLA
+0 = Black      |  A = Light Green
+1 = Blue       |  B = Light Aqua
+2 = Green      |  C = Light Red
+3 = Aqua       |  D = Light Purple
+4 = Red        |  E = Light Yellow
+5 = Purple     |  F = Bright White
+6 = Yellow     |
+7 = White      |
+8 = Gray       |
+9 = Light Blue |
+*/
+
+#endif // PROTOTIPO_H_INCLUDED
+
+
+
+
+
